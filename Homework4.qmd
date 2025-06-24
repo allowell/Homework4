@@ -1,0 +1,27 @@
+---
+title: "Homework 4 - Programming in Base R"
+format: pdf
+editor: visual
+---
+
+## Task 1: Conceptual Questions
+
+### Question 1: What is the purpose of the lapply() function? What is the equivalent purrr function?
+
+The purpose of the lapply() function is to apply a function across different elements of a list. The regular apply() function only works with arrays, but lapply() allows us to work with lists that contain heterogeneous objects. The equivalent purrr function is
+
+### Question 2: Suppose we have a list called my_list. Each element of the list is a numeric data frame (all columns are numeric). We want use lapply() to run the code cor(numeric_matrix, method = "kendall") on each element of the list. Write code to do this below! (I'm really trying to ask you how you specify method = "kendall" when calling lapply())
+
+The code to do this is is lapply(X = my_list, FUN = cor, method = "kendall")
+
+### Question 3: What are two advantages of using purrr functions instead of the BaseR apply family?
+
+Two advantages of using purrr functions instead of the BaseR apply family is that the purrr functions are more consistent across the board, whereas there are several differences in the BaseR apply family in terms of capitalization of terms (fun and FUN) and other minor differences. The purrr functions are also cleaner and easier to read than the apply family, and while they can be tough to master at first can allow for quicker and more readable code.
+
+### Question 4: What is a side-effect function?
+
+A side effect function is a function that doesn't transform the data that we're working with, but instead creates something new from that data. An example of a side-effect function is plot() as we are taking the data and plotting it, but not changing anything with the data itself.
+
+### Question 5: Why can you name a variable sd in a function and not cause any issues with the sd function?
+
+You can name a variable sd in a function and not cause any issues with the sd function because when we create functions we essentially also create a separate environment. Functions keep created objects separate, so naming somethinf sd within a function doesn't affect sd outside the function, as the function object that was created is not kept after the function is run.
