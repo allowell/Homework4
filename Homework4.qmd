@@ -125,7 +125,59 @@ n <- 100
 x <- runif(n)
 resp <- 3 + 10*x + rnorm(n)
 pred <- predict(lm(resp ~ x), data.frame(x))
-
-vec_wrapper(resp, pred)
 ```
+
+
+## Task 3: Querying an API and a Tidy-Style Function
+
+### Question 1: Using get() function
+
+Use GET() from the httr package to return information about a topic that you are interested in that has been in the news lately (store the result as an R object). Note: We can only look 30 days into the past with a free account.
+```{r}
+library(httr)
+
+#Now building the URL and getting the info
+my_url <- "https://newsapi.org/v2/everything?q=sustainability&from=2025-05-25&apiKey=f15582e470d142b3970b77b6f030ad8d"
+url_info <- httr::GET(my_url)
+```
+
+
+### Question 2: Parsing
+
+Parse what is returned and find your way to the data frame that has the actual article information in it (check content). Note the first column should be a list column!
+```{r}
+#Loading in packages
+library(jsonlite)
+library(tidyr)
+
+#Parsing
+parsed <- fromJSON(rawToChar(url_info$content))
+my_info <- as_tibble(parsed$articles)
+my_info
+```
+
+
+### Question 3: Writing a function
+
+Now write a quick function that allows the user to easily query this API. The inputs to the function should be the title/subject to search for (string), a time period to search from (string - you’ll search from that time until the present), and an API key.
+```{r}
+my_key <- "f15582e470d142b3970b77b6f030ad8d"
+
+api_query <- function(title, date, api_key){
+  api_url <- paste0("https://newsapi.org/v2/everything?q=", title, "&from=", date,
+                    "&apiKey=", api_key)
+  api_info <- GET(api_url)
+  api_parsed <- fromJSON(rawToChar(api_info$content))
+  as_tibble(api_parsed$articles)
+}
+```
+
+
+### Question 4: Testing
+
+Test your function for the title gamestop starting on May 19th, 2025.
+```{r}
+api_query("gamestop", "2025-05-25", my_key)
+```
+
 
