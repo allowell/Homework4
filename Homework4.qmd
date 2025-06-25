@@ -8,7 +8,7 @@ editor: visual
 
 ### Question 1: What is the purpose of the lapply() function? What is the equivalent purrr function?
 
-The purpose of the lapply() function is to apply a function across different elements of a list. The regular apply() function only works with arrays, but lapply() allows us to work with lists that contain heterogeneous objects. The equivalent purrr function is
+The purpose of the lapply() function is to apply a function across different elements of a list. The regular apply() function only works with arrays, but lapply() allows us to work with lists that contain heterogeneous objects. The equivalent purrr function is map().
 
 ### Question 2: Suppose we have a list called my_list. Each element of the list is a numeric data frame (all columns are numeric). We want use lapply() to run the code cor(numeric_matrix, method = "kendall") on each element of the list. Write code to do this below! (I'm really trying to ask you how you specify method = "kendall" when calling lapply())
 
@@ -61,6 +61,7 @@ resp[1:2] <- NA_real_
 getRMSE(resp, pred)
 getRMSE(resp, pred, na.rm = TRUE)
 ```
+It works as intended!
 
 ### Question 3: MAE
 
@@ -95,6 +96,7 @@ resp[1:2] <- NA_real_
 getMAE(resp, pred)
 getMAE(resp, pred, na.rm = TRUE)
 ```
+It works as intended!
 
 ### Question 5: Creating wrapper function
 
@@ -106,11 +108,21 @@ Let's create a wrapper function that can be used to get either or both metrics r
 ```{r}
 vec_wrapper <- function(responses, predictions, metrics = c("RMSE", "MAE"), ...){
   if(!is.vector(responses) | !is.numeric(responses) | !is.atomic(responses)){
-    stop("Error! Response vector not a numeric (atomic) vector!")
+    stop("Error! Not a numeric (atomic) vector!")
   }
-  else if(!is.vector(predictions) | !is.numeric(predictions) | !is.atomic(predictions)){
-    stop("Error! Predictions vector not a numeric (atomic) vector!")
+  if(!is.vector(predictions) | !is.numeric(predictions) | !is.atomic(predictions)){
+    stop("Error! Not a numeric (atomic) vector!")
   }
+  
+  final <- list()
+  if("RMSE" %in% metrics){
+    final$RMSE <- getRMSE(responses, predictions, ...)
+  }
+  if("MAE" %in% metrics){
+    final$MAE <- getMAE(responses, predictions, ...)
+  }
+  
+  final
 }
 ```
 
@@ -118,14 +130,34 @@ vec_wrapper <- function(responses, predictions, metrics = c("RMSE", "MAE"), ...)
 ### Question 6: Testing wrapper function
 
 Test your new function using this data. Call it once asking for each metric individually and once specifying both metrics. Repeat with replacing two of the response values with missing values (NA_real_). Finally, test your function by passing it incorrect data (i.e. a data frame or something else instead of vectors)
-```{r}
+```{r, error = TRUE}
 #Testing data
 set.seed(10)
 n <- 100
 x <- runif(n)
 resp <- 3 + 10*x + rnorm(n)
 pred <- predict(lm(resp ~ x), data.frame(x))
+
+#Testing with normal data above
+vec_wrapper(resp, pred, "RMSE")
+vec_wrapper(resp, pred, "MAE")
+vec_wrapper(resp, pred, c("RMSE", "MAE"))
+
+#Replacing with NA
+resp[1:2] <- NA_real_
+#Retesting with NAs
+vec_wrapper(resp, pred, "RMSE")
+vec_wrapper(resp, pred, "MAE")
+vec_wrapper(resp, pred, c("RMSE", "MAE"))
+#Now using na.rm
+vec_wrapper(resp, pred, "RMSE", na.rm = TRUE)
+vec_wrapper(resp, pred, "MAE", na.rm = TRUE)
+vec_wrapper(resp, pred, c("RMSE", "MAE"), na.rm = TRUE)
+
+#Lastly, passing the function the wrong data type
+vec_wrapper(iris[,1:2], iris[,3:4])
 ```
+Everything works as intended, and the last step gives me the proper error message!
 
 
 ## Task 3: Querying an API and a Tidy-Style Function
